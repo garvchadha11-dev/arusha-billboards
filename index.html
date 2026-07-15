@@ -29,6 +29,7 @@
     color: var(--ink);
     background: var(--paper);
     line-height: 1.6;
+    overflow-x: clip; /* safety net: no horizontal page scroll */
   }
   h1, h2, h3 { font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
   img { max-width: 100%; display: block; }
@@ -158,7 +159,11 @@
   #studio { background: var(--night); color: #fff; }
   #studio .section-sub { color: #9aa5b1; }
   .studio-grid { display: grid; grid-template-columns: 380px 1fr; gap: 36px; align-items: start; }
-  @media (max-width: 900px) { .studio-grid { grid-template-columns: 1fr; } }
+  .studio-grid > * { min-width: 0; } /* let inner scroll areas shrink instead of widening the track */
+  @media (max-width: 900px) {
+    .studio-grid { grid-template-columns: 1fr; }
+    .studio-grid > div:last-child { order: -1; } /* preview above the form on mobile */
+  }
   .studio-controls { display: flex; flex-direction: column; gap: 18px; }
   .field label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 7px; color: #c9d1da; }
   .field select, .field input[type="text"] {
@@ -274,6 +279,8 @@
 
   /* Mobile polish */
   @media (max-width: 640px) {
+    /* 16px stops iOS Safari auto-zooming focused fields */
+    input, select, textarea { font-size: 16px !important; }
     section { padding: 48px 0; }
     header.hero { padding: 64px 0 76px; }
     .hero p.lead { font-size: 16px; }
@@ -524,7 +531,7 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <!-- bump ?v= on every deploy so browsers fetch fresh JS -->
-<script src="js/locations.js?v=6"></script>
-<script src="js/site.js?v=6"></script>
+<script src="js/locations.js?v=7"></script>
+<script src="js/site.js?v=7"></script>
 </body>
 </html>
