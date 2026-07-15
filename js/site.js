@@ -13,9 +13,48 @@ p2.href = "tel:" + CONTACT.phone2_tel;
 function waLink(text) {
   return "https://wa.me/" + CONTACT.whatsapp + "?text=" + encodeURIComponent(text);
 }
-document.getElementById("waFloat").href = waLink(
-  "Hello! I'm interested in advertising on your Arusha billboards."
+// ---------- Enquiry modal ----------
+const modal = document.getElementById("enquiryModal");
+const eqLocsBox = document.getElementById("eqLocs");
+LOCATIONS.forEach(loc => {
+  const lbl = document.createElement("label");
+  lbl.innerHTML = `<input type="checkbox" value="${loc.name}" data-loc="${loc.id}"> ${loc.name.split(" - ")[0]}`;
+  eqLocsBox.appendChild(lbl);
+});
+
+function openEnquiry(locId) {
+  eqLocsBox.querySelectorAll("input").forEach(cb => { cb.checked = cb.dataset.loc === locId; });
+  modal.classList.add("open");
+}
+function closeEnquiry() { modal.classList.remove("open"); }
+
+document.getElementById("waFloat").addEventListener("click", e => { e.preventDefault(); openEnquiry(); });
+// Main CTAs (nav "Book a Board", hero "Check Availability") open the form too
+document.querySelectorAll('a.btn[href="#contact"]').forEach(a =>
+  a.addEventListener("click", e => { e.preventDefault(); openEnquiry(); })
 );
+document.getElementById("modalClose").addEventListener("click", closeEnquiry);
+modal.addEventListener("click", e => { if (e.target === modal) closeEnquiry(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeEnquiry(); });
+
+document.getElementById("eqSend").addEventListener("click", () => {
+  const name = document.getElementById("eqName").value.trim();
+  const biz = document.getElementById("eqBiz").value.trim();
+  const locs = [...eqLocsBox.querySelectorAll("input:checked")].map(cb => cb.value);
+  const dur = document.getElementById("eqDuration").value;
+  const goal = document.getElementById("eqGoal").value.trim();
+
+  let msg = "Hello! Billboard enquiry from your website.";
+  if (name) msg += "\nName: " + name;
+  if (biz) msg += "\nBusiness: " + biz;
+  msg += "\nLocations: " + (locs.length ? locs.join(", ") : "Open to recommendations");
+  msg += "\nDuration: " + dur;
+  if (goal) msg += "\nPromoting: " + goal;
+  msg += "\n\nPlease share availability and rates.";
+
+  window.open(waLink(msg), "_blank");
+  closeEnquiry();
+});
 
 // ---------- Location cards ----------
 const grid = document.getElementById("locGrid");
@@ -42,7 +81,7 @@ LOCATIONS.forEach(loc => {
       <p>${loc.blurb}</p>
       <div class="loc-aud"><b>Who sees it:</b> ${loc.audience}</div>
       <div class="loc-actions">
-        <a class="btn small" href="${waLink("Hello! I'd like to check availability for the " + loc.name + " billboard.")}" target="_blank" rel="noopener">Enquire</a>
+        <button class="btn small" onclick="openEnquiry('${loc.id}')">Enquire</button>
         <button class="btn small dark" onclick="previewLocation('${loc.id}')">Preview My Ad</button>
       </div>
     </div>`;

@@ -96,10 +96,10 @@ const LOCATIONS = [
 
 // Contact details - edit here, used everywhere on the site.
 const CONTACT = {
-  phone1: "0685 533 3666",
-  phone1_tel: "+255685533666",
+  phone1: "0685 333 666",
+  phone1_tel: "+255685333666",
   phone2: "0748 444 441",
   phone2_tel: "+255748444441",
-  whatsapp: "255748444441", // digits only, international format, no +
+  whatsapp: "255685333666", // digits only, international format, no +
   email: "" // add when ready, e.g. billboards@spanishtiles.co.tz
 };
