@@ -170,8 +170,182 @@ function currentLoc() {
   return LOCATIONS.find(l => l.id === locSelect.value) || LOCATIONS[0];
 }
 
+// ---- Real-photo mockups (green-screen quads) ----
+const viewField = document.getElementById("viewField");
+const viewSelect = document.getElementById("studioView");
+const photoCache = {};
+
+function getPhoto(src) {
+  if (!photoCache[src]) {
+    const img = new Image();
+    img.onload = drawMockup;
+    img.src = src;
+    photoCache[src] = img;
+  }
+  return photoCache[src];
+}
+
+function refreshViewOptions() {
+  const loc = currentLoc();
+  viewSelect.innerHTML = "";
+  if (loc.mockups && loc.mockups.length > 1) {
+    loc.mockups.forEach((m, i) => {
+      const opt = document.createElement("option");
+      opt.value = i;
+      opt.textContent = m.label;
+      viewSelect.appendChild(opt);
+    });
+    viewField.style.display = "";
+  } else {
+    viewField.style.display = "none";
+  }
+}
+
+// Compose the flat billboard face (artwork + headline) at the board's ratio
+function composeFace(loc) {
+  const ratio = (loc.width_m && loc.height_m) ? loc.width_m / loc.height_m : 2.4;
+  const fw = 1200, fh = Math.round(1200 / ratio);
+  const face = document.createElement("canvas");
+  face.width = fw; face.height = fh;
+  const fx = face.getContext("2d");
+
+  if (artwork) {
+    const s = Math.max(fw / artwork.width, fh / artwork.height);
+    const dw = artwork.width * s, dh = artwork.height * s;
+    fx.drawImage(artwork, (fw - dw) / 2, (fh - dh) / 2, dw, dh);
+  } else {
+    fx.fillStyle = "#f2efe8";
+    fx.fillRect(0, 0, fw, fh);
+    fx.fillStyle = "#b9b2a2";
+    fx.font = `800 ${fh * 0.22}px "Helvetica Neue", Arial, sans-serif`;
+    fx.textAlign = "center";
+    fx.textBaseline = "middle";
+    fx.fillText("YOUR AD HERE", fw / 2, fh / 2 - (headlineInput.value.trim() ? fh * 0.1 : 0));
+  }
+
+  const headline = headlineInput.value.trim();
+  if (headline) {
+    const bandH = fh * 0.24;
+    fx.fillStyle = "rgba(16,20,24,0.82)";
+    fx.fillRect(0, fh - bandH, fw, bandH);
+    fx.fillStyle = "#e8b117";
+    fx.textAlign = "center";
+    fx.textBaseline = "middle";
+    let fs = bandH * 0.5;
+    fx.font = `800 ${fs}px "Helvetica Neue", Arial, sans-serif`;
+    while (fx.measureText(headline.toUpperCase()).width > fw * 0.92 && fs > 10) {
+      fs -= 2;
+      fx.font = `800 ${fs}px "Helvetica Neue", Arial, sans-serif`;
+    }
+    fx.fillText(headline.toUpperCase(), fw / 2, fh - bandH / 2);
+  }
+  return face;
+}
+
+// Projective map: unit square -> quad [TL,TR,BR,BL] (pixel coords)
+function homography(q) {
+  const [p0, p1, p2, p3] = q;
+  const dx1 = p1[0] - p2[0], dx2 = p3[0] - p2[0];
+  const dy1 = p1[1] - p2[1], dy2 = p3[1] - p2[1];
+  const sx = p0[0] - p1[0] + p2[0] - p3[0];
+  const sy = p0[1] - p1[1] + p2[1] - p3[1];
+  const den = dx1 * dy2 - dx2 * dy1;
+  const g = (sx * dy2 - dx2 * sy) / den;
+  const h = (dx1 * sy - sx * dy1) / den;
+  const a = p1[0] - p0[0] + g * p1[0], b = p3[0] - p0[0] + h * p3[0], c = p0[0];
+  const d = p1[1] - p0[1] + g * p1[1], e = p3[1] - p0[1] + h * p3[1], f = p0[1];
+  return (u, v) => {
+    const w = g * u + h * v + 1;
+    return [(a * u + b * v + c) / w, (d * u + e * v + f) / w];
+  };
+}
+
+// Draw src canvas onto ctx warped into quad, via NxN grid of triangles
+function drawWarped(ctx2, src, quad, N = 14) {
+  const H = homography(quad);
+  const sw = src.width / N, sh = src.height / N;
+  for (let i = 0; i < N; i++) {
+    for (let j = 0; j < N; j++) {
+      const u0 = i / N, v0 = j / N, u1 = (i + 1) / N, v1 = (j + 1) / N;
+      const P00 = H(u0, v0), P10 = H(u1, v0), P11 = H(u1, v1), P01 = H(u0, v1);
+      drawTri(ctx2, src, [i * sw, j * sh], [(i + 1) * sw, j * sh], [i * sw, (j + 1) * sh], P00, P10, P01);
+      drawTri(ctx2, src, [(i + 1) * sw, j * sh], [(i + 1) * sw, (j + 1) * sh], [i * sw, (j + 1) * sh], P10, P11, P01);
+    }
+  }
+}
+
+// Affine-map one textured triangle (s0,s1,s2 in src) to (d0,d1,d2) on ctx
+function drawTri(ctx2, src, s0, s1, s2, d0, d1, d2) {
+  ctx2.save();
+  // clip path expanded ~1px from centroid so adjacent triangles overlap (hides seams)
+  const cx = (d0[0] + d1[0] + d2[0]) / 3, cy = (d0[1] + d1[1] + d2[1]) / 3;
+  ctx2.beginPath();
+  [d0, d1, d2].forEach((p, i) => {
+    const vx = p[0] - cx, vy = p[1] - cy;
+    const L = Math.hypot(vx, vy) || 1;
+    const ex = p[0] + vx / L * 1.2, ey = p[1] + vy / L * 1.2;
+    i ? ctx2.lineTo(ex, ey) : ctx2.moveTo(ex, ey);
+  });
+  ctx2.closePath();
+  ctx2.clip();
+  const [sx0, sy0] = s0, [sx1, sy1] = s1, [sx2, sy2] = s2;
+  const den = (sx1 - sx0) * (sy2 - sy0) - (sx2 - sx0) * (sy1 - sy0);
+  const m11 = ((d1[0] - d0[0]) * (sy2 - sy0) - (d2[0] - d0[0]) * (sy1 - sy0)) / den;
+  const m12 = ((d2[0] - d0[0]) * (sx1 - sx0) - (d1[0] - d0[0]) * (sx2 - sx0)) / den;
+  const m21 = ((d1[1] - d0[1]) * (sy2 - sy0) - (d2[1] - d0[1]) * (sy1 - sy0)) / den;
+  const m22 = ((d2[1] - d0[1]) * (sx1 - sx0) - (d1[1] - d0[1]) * (sx2 - sx0)) / den;
+  ctx2.transform(m11, m21, m12, m22,
+    d0[0] - m11 * sx0 - m12 * sy0,
+    d0[1] - m21 * sx0 - m22 * sy0);
+  ctx2.drawImage(src, 0, 0);
+  ctx2.restore();
+}
+
 function drawMockup() {
   const loc = currentLoc();
+  const views = loc.mockups;
+  if (views && views.length) {
+    const view = views[Math.min(viewSelect.value || 0, views.length - 1)];
+    const photo = getPhoto(view.src);
+    if (!photo.complete || !photo.naturalWidth) return; // redraws onload
+    canvas.width = 1800;
+    canvas.height = Math.round(1800 * photo.naturalHeight / photo.naturalWidth);
+    ctx.drawImage(photo, 0, 0, canvas.width, canvas.height);
+    const face = composeFace(loc);
+    view.quads.forEach(q => {
+      const quadPx = q.map(p => [p[0] * canvas.width, p[1] * canvas.height]);
+      // stroke the quad in the face's edge tone to bury any green fringe
+      ctx.strokeStyle = "rgba(40,44,48,0.9)";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      quadPx.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+      ctx.closePath();
+      ctx.stroke();
+      drawWarped(ctx, face, quadPx);
+    });
+    drawCaption(loc);
+    return;
+  }
+  drawIllustration(loc); // no site photo yet - drawn scene fallback
+}
+
+function drawCaption(loc) {
+  const W = canvas.width, H = canvas.height;
+  ctx.fillStyle = "rgba(16,20,24,0.75)";
+  ctx.textAlign = "left";
+  const cap = loc.name + "  ·  " + loc.type;
+  ctx.font = `700 ${W * 0.016}px "Helvetica Neue", Arial, sans-serif`;
+  const capW = ctx.measureText(cap).width + 36;
+  roundRect(ctx, 20, H - 58, capW, 38, 8);
+  ctx.fill();
+  ctx.fillStyle = "#fff";
+  ctx.textBaseline = "middle";
+  ctx.fillText(cap, 38, H - 39);
+}
+
+function drawIllustration(loc) {
+  canvas.width = 1200;
+  canvas.height = 900;
   const W = canvas.width, H = canvas.height;
 
   // Sky
@@ -295,7 +469,9 @@ function loadFile(file) {
   img.src = URL.createObjectURL(file);
 }
 
-dropZone.addEventListener("click", () => fileInput.click());
+dropZone.addEventListener("click", e => {
+  if (e.target !== fileInput) fileInput.click(); // input is inside the zone; its click bubbles back here
+});
 fileInput.addEventListener("change", () => loadFile(fileInput.files[0]));
 dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("over"); });
 dropZone.addEventListener("dragleave", () => dropZone.classList.remove("over"));
@@ -304,7 +480,8 @@ dropZone.addEventListener("drop", e => {
   dropZone.classList.remove("over");
   loadFile(e.dataTransfer.files[0]);
 });
-locSelect.addEventListener("change", drawMockup);
+locSelect.addEventListener("change", () => { refreshViewOptions(); drawMockup(); });
+viewSelect.addEventListener("change", drawMockup);
 headlineInput.addEventListener("input", drawMockup);
 
 document.getElementById("downloadBtn").addEventListener("click", () => {
@@ -327,9 +504,11 @@ refreshWaSend();
 // Called from location card buttons
 function previewLocation(id) {
   locSelect.value = id;
+  refreshViewOptions();
   drawMockup();
   refreshWaSend();
   document.getElementById("studio").scrollIntoView({ behavior: "smooth" });
 }
 
+refreshViewOptions();
 drawMockup();
