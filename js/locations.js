@@ -23,7 +23,7 @@ const LOCATIONS = [
     lng: 36.7035,
     width_m: null,   // e.g. 12
     height_m: null,  // e.g. 6
-    photo: "images/roundabout.jpg",
+    photo: "images/roundabout-card.jpg",
     mockups: [
       { src: "images/roundabout.jpg", label: "View A", quads: [
         [[0.1028,0.1174],[0.3333,0.2535],[0.334,0.5098],[0.1018,0.4756]],
@@ -47,7 +47,7 @@ const LOCATIONS = [
     lng: 36.71316,
     width_m: 12,
     height_m: 5,
-    photo: "images/matunda.jpg",
+    photo: "images/matunda-card.jpg",
     mockups: [
       { src: "images/matunda.jpg", label: "Front", quads: [
         [[0.293,0.1646],[0.6279,0.1787],[0.6253,0.4236],[0.2896,0.4087]]
@@ -83,7 +83,7 @@ const LOCATIONS = [
     lng: 36.6789,
     width_m: 12,
     height_m: 5,
-    photo: "images/summit.jpg",
+    photo: "images/summit-card.jpg",
     mockups: [
       { src: "images/summit.jpg", label: "Front", quads: [
         [[0.0976,0.2557],[0.4208,0.284],[0.4153,0.4976],[0.0909,0.4693]]
@@ -119,7 +119,7 @@ const LOCATIONS = [
     lng: 36.7046,
     width_m: 12,
     height_m: 5,
-    photo: "images/total.jpg",
+    photo: "images/total-card.jpg",
     mockups: [
       { src: "images/total.jpg", label: "Front", quads: [
         [[0.3213,0.2683],[0.602,0.2579],[0.6054,0.4672],[0.3226,0.4769]]
