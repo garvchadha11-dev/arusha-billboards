@@ -6,6 +6,9 @@
 <title>Arusha Billboards | Premium Outdoor Advertising Across Arusha</title>
 <meta name="description" content="8 premium billboard faces across 6 high-traffic Arusha locations: Kijenge, Njiro, Summit Centre, Tengeru and more. Put your brand in front of thousands daily.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='6' y='10' width='52' height='28' rx='4' fill='%23e8b117'/%3E%3Crect x='29' y='38' width='6' height='18' fill='%23101418'/%3E%3Ctext x='32' y='30' font-family='Arial' font-size='18' font-weight='800' text-anchor='middle' fill='%23101418'%3EAD%3C/text%3E%3C/svg%3E">
+<meta name="theme-color" content="#101418">
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<link rel="preconnect" href="https://a.tile.openstreetmap.org">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <style>
   :root {
@@ -127,6 +130,9 @@
     display: grid; place-items: center; color: rgba(255,255,255,0.85); position: relative;
     background-size: cover; background-position: center;
   }
+  .loc-photo img {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  }
   .loc-photo .ph {
     text-align: center; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase;
     color: #8b96a3;
@@ -239,6 +245,44 @@
   .m-locs input { width: auto; accent-color: var(--accent-dark); }
   .modal .btn { width: 100%; text-align: center; margin-top: 6px; }
   .modal .wa-note { text-align: center; font-size: 12px; color: #8a8f96; margin-top: 10px; }
+
+  /* Studio location chips + fullscreen viewer */
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .chip {
+    padding: 8px 14px; border-radius: 999px; border: 1.5px solid #3a434e;
+    background: transparent; color: #c9d1da; font-size: 13px; font-weight: 700;
+    cursor: pointer; font-family: inherit; transition: all .12s ease;
+  }
+  .chip:hover { border-color: var(--accent); color: #fff; }
+  .chip.active { background: var(--accent); border-color: var(--accent); color: var(--night); }
+  .fs-overlay {
+    position: fixed; inset: 0; z-index: 3000; background: rgba(8,10,12,0.96);
+    display: none; align-items: center; justify-content: center; padding: 16px;
+  }
+  .fs-overlay.open { display: flex; }
+  .fs-overlay img { max-width: 100%; max-height: 92vh; object-fit: contain; border-radius: 8px; }
+  .fs-close {
+    position: absolute; top: 16px; right: 20px; background: rgba(255,255,255,0.12);
+    border: none; color: #fff; font-size: 26px; width: 44px; height: 44px;
+    border-radius: 50%; cursor: pointer; line-height: 1;
+  }
+  .fs-hint { position: absolute; bottom: 18px; left: 0; right: 0; text-align: center; color: #8b96a3; font-size: 13px; }
+  @media (max-width: 640px) {
+    .chip-row { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
+    .chip { flex-shrink: 0; }
+  }
+
+  /* Mobile polish */
+  @media (max-width: 640px) {
+    section { padding: 48px 0; }
+    header.hero { padding: 64px 0 76px; }
+    .hero p.lead { font-size: 16px; }
+    #map { height: 340px; }
+    .studio-actions .btn { flex: 1; text-align: center; }
+    .loc-actions { flex-wrap: wrap; }
+    .loc-actions .btn { flex: 1; text-align: center; }
+    .contact-card { padding: 24px; }
+  }
 
   /* WhatsApp float */
   .wa-float {
@@ -365,11 +409,13 @@
         </div>
       </div>
       <div>
+        <div class="chip-row" id="locChips"></div>
         <div class="studio-canvas-wrap">
           <canvas id="mockupCanvas" width="1200" height="900"></canvas>
         </div>
         <div class="studio-actions">
           <button class="btn" id="downloadBtn">Download Mockup</button>
+          <button class="btn ghost" id="fullscreenBtn">View Fullscreen</button>
           <a class="btn ghost" id="waSendBtn" target="_blank" rel="noopener">Send to Us on WhatsApp</a>
         </div>
       </div>
@@ -430,6 +476,12 @@
   </div>
 </footer>
 
+<div class="fs-overlay" id="fsOverlay">
+  <button class="fs-close" id="fsClose" aria-label="Close fullscreen">×</button>
+  <img id="fsImg" alt="Billboard mockup fullscreen">
+  <div class="fs-hint">Tap anywhere to close</div>
+</div>
+
 <div class="modal-overlay" id="enquiryModal">
   <div class="modal">
     <button class="modal-close" id="modalClose" aria-label="Close">×</button>
@@ -472,7 +524,7 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <!-- bump ?v= on every deploy so browsers fetch fresh JS -->
-<script src="js/locations.js?v=5"></script>
-<script src="js/site.js?v=5"></script>
+<script src="js/locations.js?v=6"></script>
+<script src="js/site.js?v=6"></script>
 </body>
 </html>

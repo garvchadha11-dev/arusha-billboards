@@ -66,13 +66,13 @@ LOCATIONS.forEach(loc => {
   card.className = "loc-card";
   card.id = "loc-" + loc.id;
 
-  const photoStyle = loc.photo ? ` style="background-image:url('${loc.photo}')"` : "";
-  const placeholder = loc.photo ? "" :
-    `<div class="ph"><b>${loc.units * (loc.type.includes("Front") ? 2 : 1)}</b>face${loc.units * (loc.type.includes("Front") ? 2 : 1) > 1 ? "s" : ""} · photo coming soon</div>`;
+  const photoEl = loc.photo
+    ? `<img src="${loc.photo}" alt="${loc.name} billboard" loading="lazy" decoding="async">`
+    : `<div class="ph"><b>${loc.units * (loc.type.includes("Front") ? 2 : 1)}</b>face${loc.units * (loc.type.includes("Front") ? 2 : 1) > 1 ? "s" : ""} · photo coming soon</div>`;
 
   card.innerHTML = `
-    <div class="loc-photo"${photoStyle}>
-      ${placeholder}
+    <div class="loc-photo">
+      ${photoEl}
       ${loc.crossover ? '<span class="badge">Crossover</span>' : ""}
     </div>
     <div class="loc-body">
@@ -88,39 +88,44 @@ LOCATIONS.forEach(loc => {
   grid.appendChild(card);
 });
 
-// ---------- Map ----------
-const map = L.map("map", { scrollWheelZoom: false });
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  maxZoom: 19
-}).addTo(map);
-
-const pinIcon = L.divIcon({
-  className: "",
-  html: `<div style="width:30px;height:30px;background:#e8b117;border:3px solid #101418;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 3px 8px rgba(0,0,0,.35);"></div>`,
-  iconSize: [30, 30],
-  iconAnchor: [15, 30],
-  popupAnchor: [0, -30]
-});
-
+// ---------- Map (init deferred until scrolled near, saves tile downloads) ----------
 // Pin-placement edit mode: open index.html?edit, drag pins to the exact
 // spots, then copy the corrected lines from the panel into js/locations.js.
 const EDIT_MODE = new URLSearchParams(location.search).has("edit");
 
-const bounds = [];
+let map = null;
 const markers = {};
-LOCATIONS.forEach(loc => {
-  bounds.push([loc.lat, loc.lng]);
-  const m = L.marker([loc.lat, loc.lng], { icon: pinIcon, draggable: EDIT_MODE }).addTo(map);
-  m.bindPopup(`
-    <div class="popup-title">${loc.name}</div>
-    <div class="popup-meta">${loc.type}</div>
-    <a class="popup-link" href="#loc-${loc.id}">View details ↓</a>
-  `);
-  markers[loc.id] = m;
-  if (EDIT_MODE) m.on("dragend", updateEditPanel);
-});
-map.fitBounds(bounds, { padding: [40, 40] });
+
+function initMap() {
+  if (map) return;
+  map = L.map("map", { scrollWheelZoom: false });
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19
+  }).addTo(map);
+
+  const pinIcon = L.divIcon({
+    className: "",
+    html: `<div style="width:30px;height:30px;background:#e8b117;border:3px solid #101418;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 3px 8px rgba(0,0,0,.35);"></div>`,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    popupAnchor: [0, -30]
+  });
+
+  const bounds = [];
+  LOCATIONS.forEach(loc => {
+    bounds.push([loc.lat, loc.lng]);
+    const m = L.marker([loc.lat, loc.lng], { icon: pinIcon, draggable: EDIT_MODE }).addTo(map);
+    m.bindPopup(`
+      <div class="popup-title">${loc.name}</div>
+      <div class="popup-meta">${loc.type}</div>
+      <a class="popup-link" href="#loc-${loc.id}">View details ↓</a>
+    `);
+    markers[loc.id] = m;
+    if (EDIT_MODE) m.on("dragend", updateEditPanel);
+  });
+  map.fitBounds(bounds, { padding: [40, 40] });
+}
 
 function updateEditPanel() {
   const lines = LOCATIONS.map(loc => {
@@ -131,6 +136,7 @@ function updateEditPanel() {
 }
 
 if (EDIT_MODE) {
+  initMap(); // edit mode needs the map immediately
   map.scrollWheelZoom.enable();
   const panel = document.createElement("div");
   panel.style.cssText = "margin-top:14px;background:#101418;color:#e8b117;border-radius:14px;padding:18px;font-family:monospace;font-size:13px;";
@@ -480,9 +486,41 @@ dropZone.addEventListener("drop", e => {
   dropZone.classList.remove("over");
   loadFile(e.dataTransfer.files[0]);
 });
-locSelect.addEventListener("change", () => { refreshViewOptions(); drawMockup(); });
+locSelect.addEventListener("change", () => { refreshViewOptions(); drawMockup(); setActiveChip(); });
 viewSelect.addEventListener("change", drawMockup);
 headlineInput.addEventListener("input", drawMockup);
+
+// Quick-switch chips: preview the same artwork across all boards
+const chipRow = document.getElementById("locChips");
+LOCATIONS.forEach(loc => {
+  const chip = document.createElement("button");
+  chip.className = "chip";
+  chip.dataset.loc = loc.id;
+  chip.textContent = loc.name.split(" - ")[0].split(" (")[0];
+  chip.addEventListener("click", () => {
+    locSelect.value = loc.id;
+    refreshViewOptions();
+    drawMockup();
+    refreshWaSend();
+    setActiveChip();
+  });
+  chipRow.appendChild(chip);
+});
+function setActiveChip() {
+  chipRow.querySelectorAll(".chip").forEach(c =>
+    c.classList.toggle("active", c.dataset.loc === locSelect.value));
+}
+
+// Fullscreen viewer
+const fsOverlay = document.getElementById("fsOverlay");
+const fsImg = document.getElementById("fsImg");
+document.getElementById("fullscreenBtn").addEventListener("click", () => {
+  fsImg.src = canvas.toDataURL("image/jpeg", 0.92);
+  fsOverlay.classList.add("open");
+});
+function closeFs() { fsOverlay.classList.remove("open"); }
+fsOverlay.addEventListener("click", closeFs);
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeFs(); });
 
 document.getElementById("downloadBtn").addEventListener("click", () => {
   const a = document.createElement("a");
@@ -507,8 +545,24 @@ function previewLocation(id) {
   refreshViewOptions();
   drawMockup();
   refreshWaSend();
+  setActiveChip();
   document.getElementById("studio").scrollIntoView({ behavior: "smooth" });
 }
 
 refreshViewOptions();
-drawMockup();
+setActiveChip();
+
+// Defer heavy work (map tiles, studio photo) until scrolled near.
+if ("IntersectionObserver" in window && !EDIT_MODE) {
+  const lazyInit = (el, fn) => {
+    const io = new IntersectionObserver(entries => {
+      if (entries.some(e => e.isIntersecting)) { io.disconnect(); fn(); }
+    }, { rootMargin: "600px" });
+    io.observe(el);
+  };
+  lazyInit(document.getElementById("map"), initMap);
+  lazyInit(document.getElementById("studio"), drawMockup);
+} else {
+  if (!EDIT_MODE) initMap();
+  drawMockup();
+}
