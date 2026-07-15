@@ -88,6 +88,75 @@ LOCATIONS.forEach(loc => {
   grid.appendChild(card);
 });
 
+// ---------- Mobile: auto-sliding location carousel + dots ----------
+const dotsBox = document.getElementById("locDots");
+LOCATIONS.forEach((_, i) => {
+  const d = document.createElement("span");
+  if (i === 0) d.className = "on";
+  dotsBox.appendChild(d);
+});
+
+const mobileMq = matchMedia("(max-width: 640px)");
+let slideTimer = null;
+
+function currentSlide() {
+  const card = grid.querySelector(".loc-card");
+  if (!card) return 0;
+  const step = card.offsetWidth + 14;
+  return Math.round(grid.scrollLeft / step);
+}
+function goToSlide(i) {
+  const card = grid.querySelector(".loc-card");
+  if (!card) return;
+  grid.scrollTo({ left: i * (card.offsetWidth + 14), behavior: "smooth" });
+}
+function stopAutoSlide() {
+  if (slideTimer) { clearInterval(slideTimer); slideTimer = null; }
+}
+function startAutoSlide() {
+  if (slideTimer || !mobileMq.matches) return;
+  slideTimer = setInterval(() => {
+    goToSlide((currentSlide() + 1) % LOCATIONS.length);
+  }, 3500);
+}
+
+// dots follow scroll position
+let dotTick = null;
+grid.addEventListener("scroll", () => {
+  clearTimeout(dotTick);
+  dotTick = setTimeout(() => {
+    const i = currentSlide();
+    dotsBox.querySelectorAll("span").forEach((d, j) => d.classList.toggle("on", j === i));
+  }, 80);
+}, { passive: true });
+
+// user touch takes over - stop sliding for good
+grid.addEventListener("pointerdown", stopAutoSlide, { passive: true });
+grid.addEventListener("wheel", stopAutoSlide, { passive: true });
+
+// only slide while the carousel is on screen
+if ("IntersectionObserver" in window) {
+  new IntersectionObserver(entries => {
+    entries.forEach(e => e.isIntersecting ? startAutoSlide() : stopAutoSlide());
+  }, { threshold: 0.3 }).observe(grid);
+}
+mobileMq.addEventListener("change", () => { stopAutoSlide(); });
+
+// ---------- Mobile tab bar scrollspy ----------
+const navTabs = document.querySelectorAll("#navTabs a");
+if (navTabs.length && "IntersectionObserver" in window) {
+  const spy = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      navTabs.forEach(t => t.classList.toggle("active", t.getAttribute("href") === "#" + e.target.id));
+    });
+  }, { rootMargin: "-30% 0px -60% 0px" });
+  ["map-section", "locations", "studio", "how", "contact"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) spy.observe(el);
+  });
+}
+
 // ---------- Map (init deferred until scrolled near, saves tile downloads) ----------
 // Pin-placement edit mode: open index.html?edit, drag pins to the exact
 // spots, then copy the corrected lines from the panel into js/locations.js.
