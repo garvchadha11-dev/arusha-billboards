@@ -37,6 +37,31 @@ LOCATIONS.forEach(loc => {
   eqLocsBox.appendChild(lbl);
 });
 
+// Country codes for the phone field - Tanzania first, then the region and
+// common international callers.
+const COUNTRY_CODES = [
+  ["🇹🇿 TZ +255", "255"], ["🇰🇪 KE +254", "254"], ["🇺🇬 UG +256", "256"],
+  ["🇷🇼 RW +250", "250"], ["🇧🇮 BI +257", "257"], ["🇨🇩 CD +243", "243"],
+  ["🇿🇲 ZM +260", "260"], ["🇲🇼 MW +265", "265"], ["🇲🇿 MZ +258", "258"],
+  ["🇿🇦 ZA +27", "27"], ["🇮🇳 IN +91", "91"], ["🇦🇪 AE +971", "971"],
+  ["🇴🇲 OM +968", "968"], ["🇸🇦 SA +966", "966"], ["🇶🇦 QA +974", "974"],
+  ["🇬🇧 UK +44", "44"], ["🇺🇸 US +1", "1"], ["🇨🇳 CN +86", "86"],
+  ["🇩🇪 DE +49", "49"], ["🇮🇹 IT +39", "39"], ["🇪🇸 ES +34", "34"]
+];
+const ccSelect = document.getElementById("eqCC");
+COUNTRY_CODES.forEach(([label, code]) => {
+  const opt = document.createElement("option");
+  opt.value = code;
+  opt.textContent = label;
+  ccSelect.appendChild(opt);
+});
+
+// Build a clean international number: strip spaces/dashes and any leading 0
+function fullPhone() {
+  const raw = document.getElementById("eqPhone").value.replace(/\D/g, "").replace(/^0+/, "");
+  return raw ? "+" + ccSelect.value + raw : "";
+}
+
 function openEnquiry(locId) {
   eqLocsBox.querySelectorAll("input").forEach(cb => { cb.checked = cb.dataset.loc === locId; });
   modal.classList.add("open");
@@ -55,7 +80,7 @@ document.addEventListener("keydown", e => { if (e.key === "Escape") closeEnquiry
 document.getElementById("eqSend").addEventListener("click", () => {
   const name = document.getElementById("eqName").value.trim();
   const biz = document.getElementById("eqBiz").value.trim();
-  const phone = document.getElementById("eqPhone").value.trim();
+  const phone = fullPhone();
   const email = document.getElementById("eqEmail").value.trim();
   const locs = [...eqLocsBox.querySelectorAll("input:checked")].map(cb => cb.value);
   const dur = document.getElementById("eqDuration").value;

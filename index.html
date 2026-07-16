@@ -280,6 +280,9 @@
   .m-locs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }
   .m-locs label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; margin: 0; cursor: pointer; }
   .m-locs input { width: auto; accent-color: var(--accent-dark); }
+  .phone-row { display: flex; gap: 8px; }
+  .phone-row select { flex: 0 0 132px; }
+  .phone-row input { flex: 1; min-width: 0; }
   .modal .btn { width: 100%; text-align: center; margin-top: 6px; }
   .modal .wa-note { text-align: center; font-size: 12px; color: #8a8f96; margin-top: 10px; }
 
@@ -544,7 +547,10 @@
     </div>
     <div class="m-field">
       <label for="eqPhone">Phone / WhatsApp number</label>
-      <input type="tel" id="eqPhone" placeholder="e.g. 0755 123 456">
+      <div class="phone-row">
+        <select id="eqCC" aria-label="Country code"></select>
+        <input type="tel" id="eqPhone" placeholder="e.g. 755 123 456">
+      </div>
     </div>
     <div class="m-field">
       <label for="eqEmail">Email address</label>
@@ -579,7 +585,7 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <!-- bump ?v= on every deploy so browsers fetch fresh JS -->
-<script src="js/locations.js?v=15"></script>
-<script src="js/site.js?v=15"></script>
+<script src="js/locations.js?v=16"></script>
+<script src="js/site.js?v=16"></script>
 </body>
 </html>
