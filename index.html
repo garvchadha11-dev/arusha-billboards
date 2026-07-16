@@ -321,6 +321,12 @@
     color: #fff; font-size: 15px; font-weight: 700;
   }
   .fs-caption span { color: var(--accent); }
+  .fs-save {
+    position: absolute; top: 18px; left: 20px; z-index: 2; cursor: pointer;
+    background: rgba(255,255,255,0.14); border: none; color: #fff;
+    font-size: 14px; font-weight: 700; padding: 10px 18px; border-radius: 999px;
+  }
+  .fs-save:hover { background: var(--accent); color: var(--night); }
   .fs-nav {
     position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
     width: 52px; height: 52px; border-radius: 50%; border: none; cursor: pointer;
@@ -494,7 +500,7 @@
           <button class="canvas-nav next" id="nextLoc" aria-label="Next location">›</button>
         </div>
         <div class="studio-actions">
-          <button class="btn" id="downloadBtn">Download Mockup</button>
+          <button class="btn" id="downloadBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 21h16"/></svg> Download Mockup</button>
           <button class="btn ghost" id="fullscreenBtn">View Fullscreen</button>
           <a class="btn ghost" id="waSendBtn" target="_blank" rel="noopener">Send to Us on WhatsApp</a>
         </div>
@@ -569,6 +575,7 @@
 
 <div class="fs-overlay" id="fsOverlay">
   <button class="fs-close" id="fsClose" aria-label="Close fullscreen">×</button>
+  <button class="fs-save" id="fsSave" aria-label="Save image"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 21h16"/></svg> Save</button>
   <button class="fs-nav prev" id="fsPrev" aria-label="Previous board">‹</button>
   <button class="fs-nav next" id="fsNext" aria-label="Next board">›</button>
   <img id="fsImg" alt="Billboard mockup fullscreen">
@@ -581,7 +588,7 @@
     <button class="modal-close" id="modalClose" aria-label="Close">×</button>
     <h3>Quick enquiry</h3>
     <p class="sub">Thirty seconds of detail helps us reply with exact availability and a quote. Opens in WhatsApp.</p>
-    <p id="eqMockupNote" style="display:none; background:#fdf6e3; border:1px solid var(--accent); border-radius:10px; padding:10px 14px; font-size:13.5px; color:var(--ink); margin-bottom:16px;">🎨 Your billboard mockup will be sent to us together with this enquiry.</p>
+    <p id="eqMockupNote" style="display:none; background:#fdf6e3; border:1px solid var(--accent); border-radius:10px; padding:10px 14px; font-size:13.5px; color:var(--ink); margin-bottom:16px;">🎨 Your billboard mockup will be sent to us together with this enquiry. <a href="#" id="eqSaveMockup" style="color:var(--accent-dark); font-weight:700; white-space:nowrap;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 21h16"/></svg> Save the image</a> to attach it on WhatsApp yourself too.</p>
     <input type="text" id="eqWebsite" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;height:0;opacity:0;" aria-hidden="true">
     <div class="m-field">
       <label for="eqName">Your name</label>
@@ -631,7 +638,7 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <!-- bump ?v= on every deploy so browsers fetch fresh JS -->
-<script src="js/locations.js?v=20"></script>
-<script src="js/site.js?v=20"></script>
+<script src="js/locations.js?v=21"></script>
+<script src="js/site.js?v=21"></script>
 </body>
 </html>

@@ -730,12 +730,15 @@ document.addEventListener("keydown", e => {
   if (fsIsOpen() && e.key === "ArrowLeft") stepBoard(-1);
 });
 
-document.getElementById("downloadBtn").addEventListener("click", () => {
+function saveMockupImage() {
   const a = document.createElement("a");
   a.download = "billboard-mockup-" + currentLoc().id + ".png";
   a.href = canvas.toDataURL("image/png");
   a.click();
-});
+}
+document.getElementById("downloadBtn").addEventListener("click", saveMockupImage);
+document.getElementById("fsSave").addEventListener("click", e => { e.stopPropagation(); saveMockupImage(); });
+document.getElementById("eqSaveMockup").addEventListener("click", e => { e.preventDefault(); saveMockupImage(); });
 
 // Studio send goes through the enquiry form so we always capture contact
 // details, and the mockup rides along with the lead.
