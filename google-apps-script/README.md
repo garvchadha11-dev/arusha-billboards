@@ -20,6 +20,26 @@ duration, what they're promoting, device.
    `const LEADS_ENDPOINT = "https://script.google.com/macros/s/XXXX/exec";`
    Commit + push. Done - a "Leads" tab appears in the sheet on the first enquiry.
 
+## Booking calendar (same spreadsheet)
+
+The same Code.gs also manages rentals. After updating the script code
+(see Notes below - no redeploy needed for this part):
+
+1. Reload the spreadsheet in the browser - a **Billboards** menu appears.
+2. Run **Billboards -> Set Up Booking Sheets** once (authorise when asked).
+3. Two tabs appear:
+   - **Bookings** - one row per rental. Face and Status are dropdowns
+     (all 12 faces: front/back or unit 1/2 per site). Enter client, phone,
+     start date, end date, monthly rate.
+   - **Calendar** - auto-built grid, 12 faces x 18 months.
+     Green = confirmed, yellow = pencil, grey = ended,
+     **red = double-booked (two active bookings on the same face-month)**.
+4. The calendar rebuilds itself on every edit to Bookings. Manual rebuild:
+   **Billboards -> Refresh Calendar**.
+
+To take a booking: check the face's row in Calendar for free months, add a
+row in Bookings, done. Extensions just mean editing the End Date.
+
 ## Notes
 
 - If you later edit Code.gs, use **Deploy -> Manage deployments -> edit ->
