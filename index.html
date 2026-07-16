@@ -335,6 +335,19 @@
   }
   .wa-float svg { width: 30px; height: 30px; fill: #fff; }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "Vyoma Billboards",
+  "description": "Billboard advertising across Arusha, Tanzania: 12 premium billboard faces at 6 prime locations.",
+  "url": "https://billboards.vyomaaistudios.com",
+  "telephone": "+255685333666",
+  "address": {"@type": "PostalAddress", "streetAddress": "Njiro Industrial Area, P.O. Box 174", "addressLocality": "Arusha", "addressCountry": "TZ"},
+  "geo": {"@type": "GeoCoordinates", "latitude": -3.376722, "longitude": 36.701781},
+  "areaServed": "Arusha, Tanzania"
+}
+</script>
 </head>
 <body>
 
@@ -346,6 +359,7 @@
       <a href="#locations">Locations</a>
       <a href="#studio">Mockup Studio</a>
       <a href="#how">How It Works</a>
+      <a href="blog/">Insights</a>
       <a class="btn" href="#contact">Book a Board</a>
     </div>
   </div>
@@ -355,6 +369,7 @@
     <a href="#studio">Mockup Studio</a>
     <a href="#how">How It Works</a>
     <a href="#contact">Contact</a>
+    <a href="blog/">Insights</a>
   </div>
 </nav>
 
@@ -522,7 +537,7 @@
 <footer>
   <div class="wrap foot-inner">
     <div>© <span id="year"></span> Vyoma Billboards. All rights reserved.</div>
-    <div>Kijenge · Matunda · Kibo Palace · Summit Centre · Tengeru · Njiro</div>
+    <div>Kijenge · Matunda · Kibo Palace · Summit Centre · Tengeru · Njiro · <a href="blog/" style="color:#c9d1da;">Insights</a></div>
   </div>
 </footer>
 
@@ -537,6 +552,7 @@
     <button class="modal-close" id="modalClose" aria-label="Close">×</button>
     <h3>Quick enquiry</h3>
     <p class="sub">Thirty seconds of detail helps us reply with exact availability and a quote. Opens in WhatsApp.</p>
+    <input type="text" id="eqWebsite" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;height:0;opacity:0;" aria-hidden="true">
     <div class="m-field">
       <label for="eqName">Your name</label>
       <input type="text" id="eqName" placeholder="e.g. Neema">
@@ -585,7 +601,7 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <!-- bump ?v= on every deploy so browsers fetch fresh JS -->
-<script src="js/locations.js?v=16"></script>
-<script src="js/site.js?v=16"></script>
+<script src="js/locations.js?v=17"></script>
+<script src="js/site.js?v=17"></script>
 </body>
 </html>

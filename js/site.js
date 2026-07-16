@@ -78,6 +78,8 @@ modal.addEventListener("click", e => { if (e.target === modal) closeEnquiry(); }
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeEnquiry(); });
 
 document.getElementById("eqSend").addEventListener("click", () => {
+  // honeypot: humans never see this field; bots that fill it get dropped
+  if (document.getElementById("eqWebsite").value) { closeEnquiry(); return; }
   const name = document.getElementById("eqName").value.trim();
   const biz = document.getElementById("eqBiz").value.trim();
   const phone = fullPhone();

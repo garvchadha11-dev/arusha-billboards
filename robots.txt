@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /google-apps-script/
+
+Sitemap: https://billboards.vyomaaistudios.com/sitemap.xml
