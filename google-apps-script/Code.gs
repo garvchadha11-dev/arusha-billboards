@@ -3,6 +3,17 @@
  * Receives POSTs from the website and appends one row per lead
  * to the Google Sheet this script is bound to.
  */
+// The spreadsheet everything writes to - works from any script project,
+// bound or standalone (no reliance on getActiveSpreadsheet).
+const SHEET_ID = "1aUySSbT2qSxREVEpY3UzC_TX4sRjeDlWdA1wy1CtWGU";
+function targetSpreadsheet() {
+  try {
+    const s = SpreadsheetApp.getActiveSpreadsheet();
+    if (s) return s;
+  } catch (e) {}
+  return SpreadsheetApp.openById(SHEET_ID);
+}
+
 const SHEET_NAME = "Leads";
 const HEADERS = ["Timestamp", "Type", "Name", "Business", "Locations", "Duration", "Promoting", "Headline", "Page", "Device"];
 
@@ -19,7 +30,7 @@ function doGet(e) {
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const ss = targetSpreadsheet();
     let sheet = ss.getSheetByName(SHEET_NAME);
     if (!sheet) {
       sheet = ss.insertSheet(SHEET_NAME);
@@ -96,7 +107,7 @@ function onOpen() {
 }
 
 function setupBookingSheets() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = targetSpreadsheet();
   let b = ss.getSheetByName("Bookings");
   if (!b) {
     b = ss.insertSheet("Bookings");
@@ -116,12 +127,12 @@ function setupBookingSheets() {
     b.getRange(2, 6, 500, 1).setNumberFormat("#,##0");
   }
   refreshCalendar();
-  SpreadsheetApp.getActiveSpreadsheet().toast("Booking sheets ready. Add rentals in the Bookings tab.", "Billboards");
+  targetSpreadsheet().toast("Booking sheets ready. Add rentals in the Bookings tab.", "Billboards");
 }
 
 // Rebuild the Calendar grid from the Bookings tab
 function refreshCalendar() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = targetSpreadsheet();
   const b = ss.getSheetByName("Bookings");
   if (!b) return;
   let cal = ss.getSheetByName("Calendar");
