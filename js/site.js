@@ -627,6 +627,19 @@ function setActiveChip() {
     c.classList.toggle("active", c.dataset.loc === locSelect.value));
 }
 
+// Prev/next arrows on the preview cycle through the locations
+function stepLocation(dir) {
+  const i = LOCATIONS.findIndex(l => l.id === locSelect.value);
+  const next = LOCATIONS[(i + dir + LOCATIONS.length) % LOCATIONS.length];
+  locSelect.value = next.id;
+  refreshViewOptions();
+  drawMockup();
+  refreshWaSend();
+  setActiveChip();
+}
+document.getElementById("prevLoc").addEventListener("click", () => stepLocation(-1));
+document.getElementById("nextLoc").addEventListener("click", () => stepLocation(1));
+
 // Fullscreen viewer
 const fsOverlay = document.getElementById("fsOverlay");
 const fsImg = document.getElementById("fsImg");

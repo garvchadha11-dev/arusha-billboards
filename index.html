@@ -211,8 +211,17 @@
   .drop b { color: var(--accent); }
   .studio-canvas-wrap {
     background: #1a2129; border: 1px solid #3a434e; border-radius: var(--radius);
-    padding: 18px; overflow-x: auto;
+    padding: 18px; overflow-x: auto; position: relative;
   }
+  .canvas-nav {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 46px; height: 46px; border-radius: 50%; border: none; cursor: pointer;
+    background: rgba(16,20,24,0.75); color: #fff; font-size: 26px; line-height: 1;
+    display: grid; place-items: center; transition: background .15s ease;
+  }
+  .canvas-nav:hover { background: var(--accent); color: var(--night); }
+  .canvas-nav.prev { left: 26px; }
+  .canvas-nav.next { right: 26px; }
   #mockupCanvas { width: 100%; height: auto; border-radius: 8px; display: block; }
   .studio-actions { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
   .tips {
@@ -356,8 +365,8 @@
     <a class="logo" href="#top">VYOMA<span>BILLBOARDS</span></a>
     <div class="nav-links">
       <a href="#map-section">Map</a>
-      <a href="#locations">Locations</a>
       <a href="#studio">Mockup Studio</a>
+      <a href="#locations">Locations</a>
       <a href="#how">How It Works</a>
       <a href="blog/">Insights</a>
       <a class="btn" href="#contact">Book a Board</a>
@@ -365,8 +374,8 @@
   </div>
   <div class="nav-tabs" id="navTabs">
     <a href="#map-section">Map</a>
-    <a href="#locations">Boards</a>
     <a href="#studio">Mockup Studio</a>
+    <a href="#locations">Boards</a>
     <a href="#how">How It Works</a>
     <a href="#contact">Contact</a>
     <a href="blog/">Insights</a>
@@ -426,16 +435,6 @@
   </div>
 </section>
 
-<section id="locations">
-  <div class="wrap">
-    <span class="kicker">The network</span>
-    <h2 class="section-title">Our billboard locations</h2>
-    <p class="section-sub">Every board listed with its format and the audience it reaches. Ask us for current availability and rates.</p>
-    <div class="loc-grid" id="locGrid"></div>
-    <div class="loc-dots" id="locDots"></div>
-  </div>
-</section>
-
 <section id="studio">
   <div class="wrap">
     <span class="kicker" style="color: var(--accent);">Mockup studio</span>
@@ -477,6 +476,8 @@
         <div class="chip-row" id="locChips"></div>
         <div class="studio-canvas-wrap">
           <canvas id="mockupCanvas" width="1200" height="900"></canvas>
+          <button class="canvas-nav prev" id="prevLoc" aria-label="Previous location">‹</button>
+          <button class="canvas-nav next" id="nextLoc" aria-label="Next location">›</button>
         </div>
         <div class="studio-actions">
           <button class="btn" id="downloadBtn">Download Mockup</button>
@@ -487,6 +488,17 @@
     </div>
   </div>
 </section>
+
+<section id="locations">
+  <div class="wrap">
+    <span class="kicker">The network</span>
+    <h2 class="section-title">Our billboard locations</h2>
+    <p class="section-sub">Every board listed with its format and the audience it reaches. Ask us for current availability and rates.</p>
+    <div class="loc-grid" id="locGrid"></div>
+    <div class="loc-dots" id="locDots"></div>
+  </div>
+</section>
+
 
 <section id="how">
   <div class="wrap">
@@ -601,7 +613,7 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <!-- bump ?v= on every deploy so browsers fetch fresh JS -->
-<script src="js/locations.js?v=17"></script>
-<script src="js/site.js?v=17"></script>
+<script src="js/locations.js?v=18"></script>
+<script src="js/site.js?v=18"></script>
 </body>
 </html>
