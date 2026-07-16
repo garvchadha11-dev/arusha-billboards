@@ -102,7 +102,7 @@ LOCATIONS.forEach(loc => {
       <div class="loc-aud"><b>Who sees it:</b> ${loc.audience}</div>
       <div class="loc-actions">
         <button class="btn small" onclick="openEnquiry('${loc.id}')">Enquire</button>
-        <button class="btn small dark" onclick="previewLocation('${loc.id}')">Preview My Ad</button>
+        <button class="btn small dark" onclick="previewLocation('${loc.id}')">Preview My Billboard</button>
       </div>
     </div>`;
   grid.appendChild(card);
