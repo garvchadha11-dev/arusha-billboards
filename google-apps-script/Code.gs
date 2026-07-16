@@ -1,5 +1,5 @@
 /**
- * Arusha Billboards - lead logger.
+ * Vyoma Billboards - lead logger.
  * Receives POSTs from the website and appends one row per lead
  * to the Google Sheet this script is bound to.
  */
