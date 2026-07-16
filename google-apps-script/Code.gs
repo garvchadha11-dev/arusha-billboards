@@ -11,7 +11,7 @@ function targetSpreadsheet() {
 }
 
 const SHEET_NAME = "Leads";
-const HEADERS = ["Timestamp", "Type", "Name", "Phone", "Email", "Business", "Locations", "Duration", "Promoting", "Headline", "Page", "Device"];
+const HEADERS = ["Timestamp", "Type", "Name", "Phone", "Email", "Business", "Locations", "Duration", "Promoting", "Headline", "Mockup", "Page", "Device"];
 
 // Remote maintenance triggers (no menu needed):
 //   <web app url>?action=setup    -> creates Bookings + Calendar tabs
@@ -54,12 +54,32 @@ function doPost(e) {
       data.duration || "",
       data.promoting || "",
       data.headline || "",
+      saveMockup(data),
       data.page || "",
       shortDevice(data.ua || "")
     ]);
     return ContentService.createTextOutput("ok");
   } catch (err) {
     return ContentService.createTextOutput("error: " + err);
+  }
+}
+
+// If the lead carries a mockup image (base64 data URL), save it to a
+// "Billboard Mockups" folder in Drive and return a shareable link.
+function saveMockup(data) {
+  if (!data.mockup || data.mockup.indexOf("base64,") === -1) return "";
+  try {
+    const bytes = Utilities.base64Decode(data.mockup.split("base64,")[1]);
+    const name = "mockup-" + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyyMMdd-HHmmss") +
+                 (data.name ? "-" + String(data.name).replace(/[^\w]+/g, "_").slice(0, 20) : "") + ".jpg";
+    const blob = Utilities.newBlob(bytes, "image/jpeg", name);
+    const it = DriveApp.getFoldersByName("Billboard Mockups");
+    const folder = it.hasNext() ? it.next() : DriveApp.createFolder("Billboard Mockups");
+    const file = folder.createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    return file.getUrl();
+  } catch (err) {
+    return "save failed: " + err;
   }
 }
 

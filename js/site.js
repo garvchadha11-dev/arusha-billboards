@@ -19,12 +19,15 @@ function waLink(text) {
 function logLead(data) {
   if (!LEADS_ENDPOINT) return;
   try {
+    const body = JSON.stringify({ ...data, page: location.href, ua: navigator.userAgent });
     fetch(LEADS_ENDPOINT, {
       method: "POST",
       mode: "no-cors",
-      keepalive: true,
+      // keepalive caps the body at ~64KB, so skip it for mockup uploads;
+      // WhatsApp opens in a new tab so this page keeps living either way
+      keepalive: body.length < 60000,
       headers: { "Content-Type": "text/plain" }, // text/plain avoids CORS preflight
-      body: JSON.stringify({ ...data, page: location.href, ua: navigator.userAgent })
+      body
     }).catch(() => {});
   } catch (e) { /* logging must never break the enquiry */ }
 }
@@ -62,11 +65,17 @@ function fullPhone() {
   return raw ? "+" + ccSelect.value + raw : "";
 }
 
-function openEnquiry(locId) {
+// When the enquiry comes from the mockup studio, the rendered mockup is
+// uploaded with the lead (visible in the Leads sheet as a Drive link).
+let attachMockup = false;
+
+function openEnquiry(locId, withMockup) {
+  attachMockup = !!withMockup;
+  document.getElementById("eqMockupNote").style.display = attachMockup ? "" : "none";
   eqLocsBox.querySelectorAll("input").forEach(cb => { cb.checked = cb.dataset.loc === locId; });
   modal.classList.add("open");
 }
-function closeEnquiry() { modal.classList.remove("open"); }
+function closeEnquiry() { modal.classList.remove("open"); attachMockup = false; }
 
 document.getElementById("waFloat").addEventListener("click", e => { e.preventDefault(); openEnquiry(); });
 // Main CTAs (nav "Book a Board", hero "Check Availability") open the form too
@@ -89,6 +98,7 @@ document.getElementById("eqSend").addEventListener("click", () => {
   const goal = document.getElementById("eqGoal").value.trim();
 
   let msg = "Hello! Billboard enquiry from your website.";
+  if (attachMockup) msg = "Hello! I designed a billboard mockup on your website and I'd like a quote.";
   if (name) msg += "\nName: " + name;
   if (biz) msg += "\nBusiness: " + biz;
   if (phone) msg += "\nPhone: " + phone;
@@ -96,9 +106,15 @@ document.getElementById("eqSend").addEventListener("click", () => {
   msg += "\nLocations: " + (locs.length ? locs.join(", ") : "Open to recommendations");
   msg += "\nDuration: " + dur;
   if (goal) msg += "\nPromoting: " + goal;
+  if (attachMockup) msg += "\nMockup: sent with my enquiry via your website";
   msg += "\n\nPlease share availability and rates.";
 
-  logLead({ type: "enquiry-form", name, phone, email, business: biz, locations: locs.join(", "), duration: dur, promoting: goal });
+  const lead = { type: attachMockup ? "mockup-enquiry" : "enquiry-form", name, phone, email, business: biz, locations: locs.join(", "), duration: dur, promoting: goal };
+  if (attachMockup) {
+    lead.headline = headlineInput.value.trim();
+    lead.mockup = canvas.toDataURL("image/jpeg", 0.8); // saved to Drive by the Apps Script
+  }
+  logLead(lead);
   window.open(waLink(msg), "_blank");
   closeEnquiry();
 });
@@ -721,18 +737,14 @@ document.getElementById("downloadBtn").addEventListener("click", () => {
   a.click();
 });
 
+// Studio send goes through the enquiry form so we always capture contact
+// details, and the mockup rides along with the lead.
 const waSend = document.getElementById("waSendBtn");
-waSend.addEventListener("click", () => {
-  logLead({ type: "mockup-send", locations: currentLoc().name, headline: headlineInput.value.trim() });
+waSend.addEventListener("click", e => {
+  e.preventDefault();
+  openEnquiry(currentLoc().id, true);
 });
-function refreshWaSend() {
-  waSend.href = waLink(
-    "Hello! I made a billboard mockup for " + currentLoc().name +
-    " on your website. Sending it here - can you share availability and rates?"
-  );
-}
-locSelect.addEventListener("change", refreshWaSend);
-refreshWaSend();
+function refreshWaSend() { /* href unused - the button opens the enquiry form */ }
 
 // Called from location card buttons
 function previewLocation(id) {
