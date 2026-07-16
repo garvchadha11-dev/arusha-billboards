@@ -1,7 +1,6 @@
 // ============================================================
 // BILLBOARD LOCATION DATA - edit this file to update the site.
-// Coordinates are APPROXIMATE - drag-check each pin on
-// https://www.openstreetmap.org and paste exact lat/lng here.
+// Coordinates are EXACT (owner GPS readings, 2026-07-16).
 // Photos: put files in images/ and set the "photo" field,
 // e.g. photo: "images/kijenge-1.jpg". Leave null for placeholder.
 // Sizes: set real dimensions in metres when measured.
@@ -19,8 +18,8 @@ const LOCATIONS = [
     units: 2,
     type: "2 static units",
     crossover: false,
-    lat: -3.3770,   // old Impala Hotel roundabout, near Amber Restaurant (OSM geocoded landmarks)
-    lng: 36.7035,
+    lat: -3.377319,   // exact (owner GPS, 2026-07-16)
+    lng: 36.703353,
     width_m: null,   // e.g. 12
     height_m: null,  // e.g. 6
     photo: "images/roundabout-card.jpg",
@@ -43,8 +42,8 @@ const LOCATIONS = [
     units: 1,
     type: "Front + back, crossover billboard",
     crossover: true,
-    lat: -3.40305,  // WRONG - this is the Excel West Rd showroom; Matunda showroom not in OSM. Drag in ?edit mode.
-    lng: 36.71316,
+    lat: -3.376722,   // exact (owner GPS, 2026-07-16)
+    lng: 36.701781,
     width_m: 12,
     height_m: 5,
     photo: "images/matunda-card.jpg",
@@ -65,8 +64,8 @@ const LOCATIONS = [
     units: 2,
     type: "2 static units",
     crossover: false,
-    lat: -3.3754,   // Kibo Palace Hotel, Ingira Street (OSM geocoded) - nudge to showroom in ?edit mode
-    lng: 36.6986,
+    lat: -3.374403,   // exact (owner GPS, 2026-07-16)
+    lng: 36.697553,
     width_m: null,
     height_m: null,
     photo: null,
@@ -79,8 +78,8 @@ const LOCATIONS = [
     units: 1,
     type: "Front + back, crossover billboard",
     crossover: true,
-    lat: -3.3755,   // TFA complex / Shoppers, Sokoine Road (OSM geocoded)
-    lng: 36.6789,
+    lat: -3.374789,   // exact (owner GPS, 2026-07-16)
+    lng: 36.679881,
     width_m: 12,
     height_m: 5,
     photo: "images/summit-card.jpg",
@@ -101,8 +100,8 @@ const LOCATIONS = [
     units: 1,
     type: "Front + back",
     crossover: false,
-    lat: -3.3733,   // Tengeru on Arusha-Moshi highway (OSM geocoded)
-    lng: 36.7860,
+    lat: -3.373639,   // exact (owner GPS, 2026-07-16)
+    lng: 36.778072,
     width_m: null,
     height_m: null,
     photo: null,
@@ -115,8 +114,8 @@ const LOCATIONS = [
     units: 1,
     type: "Front + back, crossover billboard",
     crossover: true,
-    lat: -3.3905,   // APPROXIMATE - station is left of RSA Limited, Njiro; RSA not in OSM, drag in ?edit mode
-    lng: 36.7046,
+    lat: -3.397439,   // exact (owner GPS, 2026-07-16)
+    lng: 36.704969,
     width_m: 12,
     height_m: 5,
     photo: "images/total-card.jpg",
