@@ -142,3 +142,7 @@ const CONTACT = {
   whatsapp: "255685333666", // digits only, international format, no +
   email: "" // add when ready, e.g. billboards@spanishtiles.co.tz
 };
+
+// Google Sheet lead logging. Paste your Apps Script Web App URL here
+// (setup steps in google-apps-script/README.md). Empty = logging off.
+const LEADS_ENDPOINT = "";

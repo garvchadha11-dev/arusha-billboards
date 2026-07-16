@@ -13,6 +13,21 @@ p2.href = "tel:" + CONTACT.phone2_tel;
 function waLink(text) {
   return "https://wa.me/" + CONTACT.whatsapp + "?text=" + encodeURIComponent(text);
 }
+
+// Fire-and-forget lead logging to the Google Sheet (see google-apps-script/).
+// Never blocks or breaks the WhatsApp handoff: no-cors + keepalive, errors swallowed.
+function logLead(data) {
+  if (!LEADS_ENDPOINT) return;
+  try {
+    fetch(LEADS_ENDPOINT, {
+      method: "POST",
+      mode: "no-cors",
+      keepalive: true,
+      headers: { "Content-Type": "text/plain" }, // text/plain avoids CORS preflight
+      body: JSON.stringify({ ...data, page: location.href, ua: navigator.userAgent })
+    }).catch(() => {});
+  } catch (e) { /* logging must never break the enquiry */ }
+}
 // ---------- Enquiry modal ----------
 const modal = document.getElementById("enquiryModal");
 const eqLocsBox = document.getElementById("eqLocs");
@@ -52,6 +67,7 @@ document.getElementById("eqSend").addEventListener("click", () => {
   if (goal) msg += "\nPromoting: " + goal;
   msg += "\n\nPlease share availability and rates.";
 
+  logLead({ type: "enquiry-form", name, business: biz, locations: locs.join(", "), duration: dur, promoting: goal });
   window.open(waLink(msg), "_blank");
   closeEnquiry();
 });
@@ -599,6 +615,9 @@ document.getElementById("downloadBtn").addEventListener("click", () => {
 });
 
 const waSend = document.getElementById("waSendBtn");
+waSend.addEventListener("click", () => {
+  logLead({ type: "mockup-send", locations: currentLoc().name, headline: headlineInput.value.trim() });
+});
 function refreshWaSend() {
   waSend.href = waLink(
     "Hello! I made a billboard mockup for " + currentLoc().name +
