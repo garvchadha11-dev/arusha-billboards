@@ -55,6 +55,8 @@ document.addEventListener("keydown", e => { if (e.key === "Escape") closeEnquiry
 document.getElementById("eqSend").addEventListener("click", () => {
   const name = document.getElementById("eqName").value.trim();
   const biz = document.getElementById("eqBiz").value.trim();
+  const phone = document.getElementById("eqPhone").value.trim();
+  const email = document.getElementById("eqEmail").value.trim();
   const locs = [...eqLocsBox.querySelectorAll("input:checked")].map(cb => cb.value);
   const dur = document.getElementById("eqDuration").value;
   const goal = document.getElementById("eqGoal").value.trim();
@@ -62,12 +64,14 @@ document.getElementById("eqSend").addEventListener("click", () => {
   let msg = "Hello! Billboard enquiry from your website.";
   if (name) msg += "\nName: " + name;
   if (biz) msg += "\nBusiness: " + biz;
+  if (phone) msg += "\nPhone: " + phone;
+  if (email) msg += "\nEmail: " + email;
   msg += "\nLocations: " + (locs.length ? locs.join(", ") : "Open to recommendations");
   msg += "\nDuration: " + dur;
   if (goal) msg += "\nPromoting: " + goal;
   msg += "\n\nPlease share availability and rates.";
 
-  logLead({ type: "enquiry-form", name, business: biz, locations: locs.join(", "), duration: dur, promoting: goal });
+  logLead({ type: "enquiry-form", name, phone, email, business: biz, locations: locs.join(", "), duration: dur, promoting: goal });
   window.open(waLink(msg), "_blank");
   closeEnquiry();
 });

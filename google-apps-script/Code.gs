@@ -15,7 +15,7 @@ function targetSpreadsheet() {
 }
 
 const SHEET_NAME = "Leads";
-const HEADERS = ["Timestamp", "Type", "Name", "Business", "Locations", "Duration", "Promoting", "Headline", "Page", "Device"];
+const HEADERS = ["Timestamp", "Type", "Name", "Phone", "Email", "Business", "Locations", "Duration", "Promoting", "Headline", "Page", "Device"];
 
 // Remote maintenance triggers (no menu needed):
 //   <web app url>?action=setup    -> creates Bookings + Calendar tabs
@@ -38,10 +38,17 @@ function doPost(e) {
       sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight("bold");
       sheet.setFrozenRows(1);
     }
+    // self-heal the header row when columns are added in an update
+    const h = sheet.getRange(1, 1, 1, HEADERS.length).getValues()[0];
+    if (h.join("|") !== HEADERS.join("|")) {
+      sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]).setFontWeight("bold");
+    }
     sheet.appendRow([
       new Date(),
       data.type || "",
       data.name || "",
+      data.phone || "",
+      data.email || "",
       data.business || "",
       data.locations || "",
       data.duration || "",
