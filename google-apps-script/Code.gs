@@ -3,14 +3,10 @@
  * Receives POSTs from the website and appends one row per lead
  * to the Google Sheet this script is bound to.
  */
-// The spreadsheet everything writes to - works from any script project,
-// bound or standalone (no reliance on getActiveSpreadsheet).
-const SHEET_ID = "1aUySSbT2qSxREVEpY3UzC_TX4sRjeDlWdA1wy1CtWGU";
+// The ONE spreadsheet everything writes to - pinned by ID so it never
+// matters which script project this code lives in.
+const SHEET_ID = "1a06ucLCYWjNAlINupEekAyrCyK0KWMokImfKjD5VU9Q";
 function targetSpreadsheet() {
-  try {
-    const s = SpreadsheetApp.getActiveSpreadsheet();
-    if (s) return s;
-  } catch (e) {}
   return SpreadsheetApp.openById(SHEET_ID);
 }
 
@@ -24,6 +20,10 @@ function doGet(e) {
   const action = e && e.parameter && e.parameter.action;
   if (action === "setup") { setupBookingSheets(); return ContentService.createTextOutput("setup done"); }
   if (action === "refresh") { refreshCalendar(); return ContentService.createTextOutput("calendar refreshed"); }
+  if (action === "where") {
+    const ss = targetSpreadsheet();
+    return ContentService.createTextOutput("writing to: " + ss.getName() + " | " + ss.getUrl());
+  }
   return ContentService.createTextOutput("Vyoma Billboards API is running");
 }
 
