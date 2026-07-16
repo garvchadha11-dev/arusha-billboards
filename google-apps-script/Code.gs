@@ -6,6 +6,16 @@
 const SHEET_NAME = "Leads";
 const HEADERS = ["Timestamp", "Type", "Name", "Business", "Locations", "Duration", "Promoting", "Headline", "Page", "Device"];
 
+// Remote maintenance triggers (no menu needed):
+//   <web app url>?action=setup    -> creates Bookings + Calendar tabs
+//   <web app url>?action=refresh  -> rebuilds the Calendar grid
+function doGet(e) {
+  const action = e && e.parameter && e.parameter.action;
+  if (action === "setup") { setupBookingSheets(); return ContentService.createTextOutput("setup done"); }
+  if (action === "refresh") { refreshCalendar(); return ContentService.createTextOutput("calendar refreshed"); }
+  return ContentService.createTextOutput("Vyoma Billboards API is running");
+}
+
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
