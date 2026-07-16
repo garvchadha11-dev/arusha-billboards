@@ -446,9 +446,11 @@ function drawMockup() {
       drawWarped(ctx, face, quadPx);
     });
     drawCaption(loc);
+    fsSync();
     return;
   }
   drawIllustration(loc); // no site photo yet - drawn scene fallback
+  fsSync();
 }
 
 function drawCaption(loc) {
@@ -466,8 +468,9 @@ function drawCaption(loc) {
 }
 
 function drawIllustration(loc) {
-  canvas.width = 1200;
-  canvas.height = 900;
+  // same size as the photo mockups so the preview (and its arrows) never jump
+  canvas.width = 1800;
+  canvas.height = 1013;
   const W = canvas.width, H = canvas.height;
 
   // Sky
@@ -627,29 +630,89 @@ function setActiveChip() {
     c.classList.toggle("active", c.dataset.loc === locSelect.value));
 }
 
-// Prev/next arrows on the preview cycle through the locations
-function stepLocation(dir) {
-  const i = LOCATIONS.findIndex(l => l.id === locSelect.value);
-  const next = LOCATIONS[(i + dir + LOCATIONS.length) % LOCATIONS.length];
-  locSelect.value = next.id;
+// One flat list of every board view: location x (views or single scene).
+// Both the preview arrows and the fullscreen gallery walk this list, so
+// "next" always reaches every face including View B / Back sides.
+const STEPS = [];
+LOCATIONS.forEach(loc => {
+  const n = (loc.mockups && loc.mockups.length) || 1;
+  for (let v = 0; v < n; v++) STEPS.push({ locId: loc.id, view: v });
+});
+
+function currentStepIndex() {
+  const v = parseInt(viewSelect.value || "0", 10) || 0;
+  const i = STEPS.findIndex(st => st.locId === locSelect.value && st.view === v);
+  return i === -1 ? 0 : i;
+}
+
+function applyStep(i) {
+  const st = STEPS[(i + STEPS.length) % STEPS.length];
+  locSelect.value = st.locId;
   refreshViewOptions();
+  viewSelect.value = st.view;
   drawMockup();
   refreshWaSend();
   setActiveChip();
+  updateFsCaption();
 }
-document.getElementById("prevLoc").addEventListener("click", () => stepLocation(-1));
-document.getElementById("nextLoc").addEventListener("click", () => stepLocation(1));
 
-// Fullscreen viewer
+function stepBoard(dir) { applyStep(currentStepIndex() + dir); }
+document.getElementById("prevLoc").addEventListener("click", () => stepBoard(-1));
+document.getElementById("nextLoc").addEventListener("click", () => stepBoard(1));
+
+// Fullscreen gallery: same steps, fixed arrows, swipe, live re-render
 const fsOverlay = document.getElementById("fsOverlay");
 const fsImg = document.getElementById("fsImg");
-document.getElementById("fullscreenBtn").addEventListener("click", () => {
+const fsCaption = document.getElementById("fsCaption");
+
+function fsIsOpen() { return fsOverlay.classList.contains("open"); }
+
+function updateFsCaption() {
+  if (!fsIsOpen()) return;
+  const loc = currentLoc();
+  const view = (loc.mockups && loc.mockups.length > 1)
+    ? " · " + loc.mockups[Math.min(viewSelect.value || 0, loc.mockups.length - 1)].label : "";
+  fsCaption.innerHTML = `${loc.name}${view} <span>${currentStepIndex() + 1} / ${STEPS.length}</span>`;
+}
+
+// called at the end of every draw so the fullscreen image stays current
+function fsSync() {
+  if (!fsIsOpen()) return;
   fsImg.src = canvas.toDataURL("image/jpeg", 0.92);
+  updateFsCaption();
+}
+
+document.getElementById("fullscreenBtn").addEventListener("click", () => {
   fsOverlay.classList.add("open");
+  fsSync();
 });
 function closeFs() { fsOverlay.classList.remove("open"); }
-fsOverlay.addEventListener("click", closeFs);
-document.addEventListener("keydown", e => { if (e.key === "Escape") closeFs(); });
+
+document.getElementById("fsPrev").addEventListener("click", e => { e.stopPropagation(); stepBoard(-1); });
+document.getElementById("fsNext").addEventListener("click", e => { e.stopPropagation(); stepBoard(1); });
+document.getElementById("fsClose").addEventListener("click", e => { e.stopPropagation(); closeFs(); });
+
+// swipe left/right to change board; a real swipe never closes the viewer
+let fsTouchX = null, fsSwiped = false;
+fsOverlay.addEventListener("touchstart", e => { fsTouchX = e.touches[0].clientX; fsSwiped = false; }, { passive: true });
+fsOverlay.addEventListener("touchmove", e => {
+  if (fsTouchX !== null && Math.abs(e.touches[0].clientX - fsTouchX) > 12) fsSwiped = true;
+}, { passive: true });
+fsOverlay.addEventListener("touchend", e => {
+  if (fsTouchX === null) return;
+  const dx = e.changedTouches[0].clientX - fsTouchX;
+  fsTouchX = null;
+  if (Math.abs(dx) > 40) stepBoard(dx < 0 ? 1 : -1);
+});
+fsOverlay.addEventListener("click", e => {
+  if (fsSwiped) { fsSwiped = false; return; }
+  if (e.target === fsOverlay || e.target === fsImg) closeFs();
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") closeFs();
+  if (fsIsOpen() && e.key === "ArrowRight") stepBoard(1);
+  if (fsIsOpen() && e.key === "ArrowLeft") stepBoard(-1);
+});
 
 document.getElementById("downloadBtn").addEventListener("click", () => {
   const a = document.createElement("a");

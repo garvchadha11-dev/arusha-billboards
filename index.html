@@ -315,7 +315,21 @@
     border: none; color: #fff; font-size: 26px; width: 44px; height: 44px;
     border-radius: 50%; cursor: pointer; line-height: 1;
   }
-  .fs-hint { position: absolute; bottom: 18px; left: 0; right: 0; text-align: center; color: #8b96a3; font-size: 13px; }
+  .fs-hint { position: absolute; bottom: 16px; left: 0; right: 0; text-align: center; color: #8b96a3; font-size: 12.5px; }
+  .fs-caption {
+    position: absolute; bottom: 44px; left: 0; right: 0; text-align: center;
+    color: #fff; font-size: 15px; font-weight: 700;
+  }
+  .fs-caption span { color: var(--accent); }
+  .fs-nav {
+    position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+    width: 52px; height: 52px; border-radius: 50%; border: none; cursor: pointer;
+    background: rgba(255,255,255,0.14); color: #fff; font-size: 30px; line-height: 1;
+    display: grid; place-items: center; transition: background .15s ease;
+  }
+  .fs-nav:hover { background: var(--accent); color: var(--night); }
+  .fs-nav.prev { left: 14px; }
+  .fs-nav.next { right: 14px; }
   @media (max-width: 640px) {
     .chip-row { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
     .chip { flex-shrink: 0; }
@@ -555,8 +569,11 @@
 
 <div class="fs-overlay" id="fsOverlay">
   <button class="fs-close" id="fsClose" aria-label="Close fullscreen">×</button>
+  <button class="fs-nav prev" id="fsPrev" aria-label="Previous board">‹</button>
+  <button class="fs-nav next" id="fsNext" aria-label="Next board">›</button>
   <img id="fsImg" alt="Billboard mockup fullscreen">
-  <div class="fs-hint">Tap anywhere to close</div>
+  <div class="fs-caption" id="fsCaption"></div>
+  <div class="fs-hint">Swipe or use the arrows · tap the picture to close</div>
 </div>
 
 <div class="modal-overlay" id="enquiryModal">
@@ -613,7 +630,7 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <!-- bump ?v= on every deploy so browsers fetch fresh JS -->
-<script src="js/locations.js?v=18"></script>
-<script src="js/site.js?v=18"></script>
+<script src="js/locations.js?v=19"></script>
+<script src="js/site.js?v=19"></script>
 </body>
 </html>
