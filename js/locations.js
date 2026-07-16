@@ -145,4 +145,4 @@ const CONTACT = {
 
 // Google Sheet lead logging. Paste your Apps Script Web App URL here
 // (setup steps in google-apps-script/README.md). Empty = logging off.
-const LEADS_ENDPOINT = "https://script.google.com/macros/s/AKfycbxiZIzpsLjjyIAxVImoP12gzSqUhPk8CFn6jEfwR5y7pDiOw9JE303gf64sPdDAtGAS/exec";
+const LEADS_ENDPOINT = "https://script.google.com/macros/s/AKfycbwrgm9eBb8dhjJb43CZr_OQ42dcONYQj_Um_qw95PkI0964uwAnkLaxF5gFsFExEO_M/exec";
